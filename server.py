@@ -144,17 +144,22 @@ def start_server():
 
     while True:
         conn, addr = server.accept()
-        if connection_queue.full():
-            print(f"[REJECTED] Connection from {addr} rejected: queue is full.") 
-            print(f"[QUEUED] Connection from {addr} added to the queue.")
-            conn.close()
-        else:
-            print(f"[QUEUED] Connection from {addr} added to the queue.")
-            connection_queue.put((conn, addr))
-    # ekzekutohet pergjimone - perderisa queue eshte mbush, mbyll lidhjen
-    # perndryshe e vendos lidhjen ne queue - > 
-    #  - > process_queue ne background i proceson lidhjet tashme te vendosura ne queue 
 
+
+        if addr not in clients:
+            if len(clients) >= MAX_CONNECTIONS:
+
+                conn.send("Server full, please wait in queue...".encode('utf-8'))
+                connection_queue.put((conn, addr))
+                print(f"[QUEUED] Connection from {addr} added to the queue.")
+            else:
+
+                privilege = FULL_ACCESS if len(clients) == 0 else READ_ONLY
+                clients[addr] = privilege
+                thread = threading.Thread(target=handle_client, args=(conn, addr, privilege))
+                thread.start()
+
+                print(f"[ACTIVE CONNECTIONS] {len(clients)} out of {MAX_CONNECTIONS}")
 if __name__ == "__main__":
     start_server()
 
