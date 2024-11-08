@@ -4,7 +4,7 @@ import os
 import subprocess
 
 TIMEOUT = 600
-SERVER_FILES_DIR = "C:\Users\Rinaa\PycharmProjects\Gr16-Rrjeta-Komjuterike-Projekti-2"
+SERVER_FILES_DIR = r"C:\Users\Rinaa\PycharmProjects\Gr16-Rrjeta-Komjuterike-Projekti-2"
 
 
 FULL_ACCESS = 'FULL'
