@@ -14,6 +14,8 @@ SERVER_FILES_DIR = r"C:\Users\Rinaa\PycharmProjects\Gr16-Rrjeta-Komjuterike-Proj
 FULL_ACCESS = 'FULL'
 READ_ONLY = 'READ'
 
+clients = {}
+
 def handle_client(conn, addr, privilege):
     conn.settimeout(TIMEOUT)
     print(f"[NEW CONNECTION] {addr} connected with privilege: {privilege}")
