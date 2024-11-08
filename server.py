@@ -120,37 +120,40 @@ def handle_client(conn, addr, privilege):
 
         process_next_client_in_queue()
 
-
+def process_queue():
+    while True:
+        conn, addr = connection_queue.get()
+        if len(clients) < MAX_CONNECTIONS:
+            privilege = FULL_ACCESS if len(clients) == 0 else READ_ONLY
+            clients[addr] = privilege
+            thread = threading.Thread(target = handle_client, args = (conn, addr, privilege)) 
+            thread.start()
+        else:
+            conn.send("Server full, please wait in queue...".encode('utf-8'))
+            connection_queue.put((conn, addr))
 
 def start_server():
     server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     server.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
     server.bind((SERVER_IP, SERVER_PORT))
     server.listen(MAX_CONNECTIONS)
-    print(f"[LISTENING] Server is listening on {SERVER_IP}:{SERVER_PORT}")
+    print(f"[LISTENING] Server is listening on {SERVER_IP}:{SERVER_PORT}") #inicializimi i serverit
 
-   
     queue_thread = threading.Thread(target=process_queue, daemon=True)
-    queue_thread.start()
+    queue_thread.start() #process_queue ekzekutohet si background process
 
     while True:
         conn, addr = server.accept()
-
-       
-        if len(clients) >= MAX_CONNECTIONS:
-
-            conn.send("Server full, please wait in queue...".encode('utf-8'))
-            connection_queue.put((conn, addr)) 
+        if connection_queue.full():
+            print(f"[REJECTED] Connection from {addr} rejected: queue is full.") 
             print(f"[QUEUED] Connection from {addr} added to the queue.")
+            conn.close()
         else:
-        
-            privilege = FULL_ACCESS if len(clients) == 0 else READ_ONLY
-            clients[addr] = privilege
-            thread = threading.Thread(target=handle_client, args=(conn, addr, privilege))
-            thread.start()
-            print(f"[NEW CONNECTION] {addr} connected with privilege: {privilege}")
-            print(f"[ACTIVE CONNECTIONS] {len(clients)} out of {MAX_CONNECTIONS}")
-
+            print(f"[QUEUED] Connection from {addr} added to the queue.")
+            connection_queue.put((conn, addr))
+    # ekzekutohet pergjimone - perderisa queue eshte mbush, mbyll lidhjen
+    # perndryshe e vendos lidhjen ne queue - > 
+    #  - > process_queue ne background i proceson lidhjet tashme te vendosura ne queue 
 
 if __name__ == "__main__":
     start_server()
