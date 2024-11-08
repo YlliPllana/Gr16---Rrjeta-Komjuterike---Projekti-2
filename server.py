@@ -3,6 +3,10 @@ import time
 import os
 import subprocess
 
+SERVER_IP = 'localhost'
+SERVER_PORT = 12345
+MAX_CONNECTIONS = 5
+QUEUE_SIZE = 10
 TIMEOUT = 600
 SERVER_FILES_DIR = r"C:\Users\Rinaa\PycharmProjects\Gr16-Rrjeta-Komjuterike-Projekti-2"
 
