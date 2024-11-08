@@ -3,6 +3,8 @@ import time
 import os
 import subprocess
 
+TIMEOUT = 600
+SERVER_FILES_DIR = "C:\Users\Rinaa\PycharmProjects\Gr16-Rrjeta-Komjuterike-Projekti-2"
 
 
 FULL_ACCESS = 'FULL'
@@ -22,7 +24,7 @@ def handle_client(conn, addr, privilege):
             with open("server_logs.txt", "a") as log_file:
                 log_file.write(f"{time.ctime()} - {addr} - {msg}\n")
 
-            # Check privilege level
+
             if privilege == FULL_ACCESS:
                 if msg.startswith("GET FILES"):
                     files = os.listdir(SERVER_FILES_DIR)
