@@ -56,3 +56,41 @@ def handle_client(conn, addr, privilege):
         conn.close()
         print(f"[DISCONNECTED] {addr} disconnected.")
         del clients[addr]
+
+
+
+def start_server():
+    server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+    server.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+    server.bind((SERVER_IP, SERVER_PORT))
+    server.listen(MAX_CONNECTIONS)
+    print(f"[LISTENING] Server is listening on {SERVER_IP}:{SERVER_PORT}")
+
+   
+    queue_thread = threading.Thread(target=process_queue, daemon=True)
+    queue_thread.start()
+
+    while True:
+        conn, addr = server.accept()
+
+       
+        if len(clients) >= MAX_CONNECTIONS:
+            # Send "Server full" message to client, then add to the queue
+            conn.send("Server full, please wait in queue...".encode('utf-8'))
+            connection_queue.put((conn, addr)) 
+            print(f"[QUEUED] Connection from {addr} added to the queue.")
+        else:
+        
+            privilege = FULL_ACCESS if len(clients) == 0 else READ_ONLY
+            clients[addr] = privilege
+            thread = threading.Thread(target=handle_client, args=(conn, addr, privilege))
+            thread.start()
+            print(f"[NEW CONNECTION] {addr} connected with privilege: {privilege}")
+            print(f"[ACTIVE CONNECTIONS] {len(clients)} out of {MAX_CONNECTIONS}")
+
+
+if __name__ == "__main__":
+    start_server()
+
+
+
