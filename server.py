@@ -3,18 +3,10 @@ import time
 import os
 import subprocess
 
-SERVER_IP = 'localhost'
-SERVER_PORT = 12345
-MAX_CONNECTIONS = 5
-QUEUE_SIZE = 10
-TIMEOUT = 600
-SERVER_FILES_DIR = r"C:\Users\Rinaa\PycharmProjects\Gr16-Rrjeta-Komjuterike-Projekti-2"
 
 
 FULL_ACCESS = 'FULL'
 READ_ONLY = 'READ'
-
-clients = {}
 
 def handle_client(conn, addr, privilege):
     conn.settimeout(TIMEOUT)
@@ -30,7 +22,7 @@ def handle_client(conn, addr, privilege):
             with open("server_logs.txt", "a") as log_file:
                 log_file.write(f"{time.ctime()} - {addr} - {msg}\n")
 
-
+            # Check privilege level
             if privilege == FULL_ACCESS:
                 if msg.startswith("GET FILES"):
                     files = os.listdir(SERVER_FILES_DIR)
