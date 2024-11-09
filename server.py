@@ -23,7 +23,6 @@ def handle_client(conn, addr, privilege):
     conn.settimeout(TIMEOUT)
     print(f"[NEW CONNECTION] {addr} connected with privilege: {privilege}")
 
-
     try:
         while True:
             try:
@@ -54,31 +53,27 @@ def handle_client(conn, addr, privilege):
                     else:
                         conn.send(f"File '{filename}' not found.".encode('utf-8'))
                 elif msg.startswith("EXEC"):
-
-                        command_parts = msg.split(" ", 2)
-                        if len(command_parts) >= 2:
-                            if command_parts[1].upper() == "CREATE" and len(command_parts) == 3:
-
-                                filename = command_parts[2]
-                                new_file_path = os.path.join(SERVER_FILES_DIR, filename)
-                                try:
-                                    with open(new_file_path, 'w') as new_file:
-                                        new_file.write("This is a new file created by the server.")
-                                    conn.send(f"File '{filename}' created successfully.".encode('utf-8'))
-                                except Exception as e:
-                                    conn.send(f"Error creating file '{filename}': {str(e)}".encode('utf-8'))
-                            elif command_parts[1].upper() == "LIST":
-
-                                connected_clients = "\n".join([f"{ip} - {priv}" for ip, priv in clients.items()])
-                                response = "Connected users and their privileges:\n" + (
-                                    connected_clients if connected_clients else "No users connected.")
-                                conn.send(response.encode('utf-8'))
-                            else:
-                                conn.send("Unknown EXEC command.".encode('utf-8'))
+                    command_parts = msg.split(" ", 2)
+                    if len(command_parts) >= 2:
+                        if command_parts[1].upper() == "CREATE" and len(command_parts) == 3:
+                            filename = command_parts[2]
+                            new_file_path = os.path.join(SERVER_FILES_DIR, filename)
+                            try:
+                                with open(new_file_path, 'w') as new_file:
+                                    new_file.write("This is a new file created by the server.")
+                                conn.send(f"File '{filename}' created successfully.".encode('utf-8'))
+                            except Exception as e:
+                                conn.send(f"Error creating file '{filename}': {str(e)}".encode('utf-8'))
+                        elif command_parts[1].upper() == "LIST":
+                            connected_clients = "\n".join([f"{ip} - {priv}" for ip, priv in clients.items()])
+                            response = "Connected users and their privileges:\n" + (
+                                connected_clients if connected_clients else "No users connected.")
+                            conn.send(response.encode('utf-8'))
                         else:
-                            conn.send("Invalid EXEC command format.".encode('utf-8'))
+                            conn.send("Unknown EXEC command.".encode('utf-8'))
+                    else:
+                        conn.send("Invalid EXEC command format.".encode('utf-8'))
                 elif msg.startswith("WRITE "):
-
                     try:
                         filename, text = msg.split(" ", 2)[1], msg.split(" ", 2)[2]
                         file_path = os.path.join(SERVER_FILES_DIR, filename)
@@ -91,8 +86,8 @@ def handle_client(conn, addr, privilege):
                     conn.send("Unknown command.".encode('utf-8'))
             else:
 
+                time.sleep(15)
                 if msg == "GET FILES":
-                    files = os.listdir(SERVER_FILES_DIR)
                     conn.send("Limited access: No file details available.".encode('utf-8'))
                 elif msg.startswith("READ FILE "):
                     filename = msg.split(" ", 2)[2]
@@ -105,7 +100,6 @@ def handle_client(conn, addr, privilege):
                 else:
                     conn.send("Read-only access".encode('utf-8'))
 
-
             if not msg.startswith(("GET FILES", "READ FILE", "EXEC", "WRITE")):
                 conn.send(msg.encode('utf-8'))
 
@@ -117,7 +111,6 @@ def handle_client(conn, addr, privilege):
         conn.close()
         print(f"[DISCONNECTED] {addr} disconnected.")
         del clients[addr]
-
         process_next_client_in_queue()
 
 def process_queue():
@@ -137,10 +130,10 @@ def start_server():
     server.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
     server.bind((SERVER_IP, SERVER_PORT))
     server.listen(MAX_CONNECTIONS)
-    print(f"[LISTENING] Server is listening on {SERVER_IP}:{SERVER_PORT}") #inicializimi i serverit
+    print(f"[LISTENING] Server is listening on {SERVER_IP}:{SERVER_PORT}")
 
     queue_thread = threading.Thread(target=process_queue, daemon=True)
-    queue_thread.start() #process_queue ekzekutohet si background process
+    queue_thread.start()
 
     while True:
         conn, addr = server.accept()
