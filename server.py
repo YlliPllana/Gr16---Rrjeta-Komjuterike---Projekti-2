@@ -145,25 +145,28 @@ def start_server():
     server.listen(MAX_CONNECTIONS)
     print(f"[LISTENING] Server is listening on {SERVER_IP}:{SERVER_PORT}")
 
-    queue_thread = threading.Thread(target=process_queue, daemon=True)
-    queue_thread.start()
-
     while True:
         conn, addr = server.accept()
 
-
         if addr not in clients:
             if len(clients) >= MAX_CONNECTIONS:
-
-                conn.send("Server full, please wait in queue...".encode('utf-8'))
-                connection_queue.put((conn, addr))
-                print(f"[QUEUED] Connection from {addr} added to the queue.")
+                if connection_queue.full():
+                    conn.send("Server and queue full, please try again later.".encode('utf-8'))
+                    conn.close()
+                    print(f"[REJECTED] Connection from {addr} rejected. Server and queue are full.")
+                else:
+                    conn.send("Server full, please wait in queue...".encode('utf-8'))
+                    connection_queue.put((conn, addr))
+                    print(f"[QUEUED] Connection from {addr} added to the queue.")
             else:
-
                 privilege = FULL_ACCESS if len(clients) == 0 else READ_ONLY
                 clients[addr] = privilege
                 thread = threading.Thread(target=handle_client, args=(conn, addr, privilege))
                 thread.start()
+                print(f"[ACTIVE CONNECTIONS] {len(clients)} out of {MAX_CONNECTIONS}")
+                
+if __name__ == "__main__":
+start_server()
 
                 print(f"[ACTIVE CONNECTIONS] {len(clients)} out of {MAX_CONNECTIONS}")
 if __name__ == "__main__":
