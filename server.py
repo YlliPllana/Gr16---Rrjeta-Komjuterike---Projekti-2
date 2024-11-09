@@ -164,10 +164,6 @@ def start_server():
                 thread = threading.Thread(target=handle_client, args=(conn, addr, privilege))
                 thread.start()
                 print(f"[ACTIVE CONNECTIONS] {len(clients)} out of {MAX_CONNECTIONS}")
-                
-if __name__ == "__main__":
-start_server()
-
                 print(f"[ACTIVE CONNECTIONS] {len(clients)} out of {MAX_CONNECTIONS}")
 if __name__ == "__main__":
     start_server()
