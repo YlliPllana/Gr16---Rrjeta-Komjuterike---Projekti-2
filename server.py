@@ -113,17 +113,30 @@ def handle_client(conn, addr, privilege):
         del clients[addr]
         process_next_client_in_queue()
 
-def process_queue():
-    while True:
+def process_next_client_in_queue():
+    if not connection_queue.empty():
         conn, addr = connection_queue.get()
+
         if len(clients) < MAX_CONNECTIONS:
             privilege = FULL_ACCESS if len(clients) == 0 else READ_ONLY
             clients[addr] = privilege
-            thread = threading.Thread(target = handle_client, args = (conn, addr, privilege)) 
+
+            conn.setblocking(False)
+            try:
+                conn.recv(1024)
+            except BlockingIOError:
+                pass
+            finally:
+                conn.setblocking(True)
+
+            thread = threading.Thread(target=handle_client, args=(conn, addr, privilege))
             thread.start()
+            print(f"[PROCESSING QUEUE] Moving client {addr} from queue to active connection.")
+            print(f"[ACTIVE CONNECTIONS] {len(clients)} out of {MAX_CONNECTIONS}")
         else:
-            conn.send("Server full, please wait in queue...".encode('utf-8'))
             connection_queue.put((conn, addr))
+    else:
+        print("[QUEUE] No clients in queue.")
 
 def start_server():
     server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
