@@ -1,5 +1,24 @@
 # Gr16---Rrjeta-Komjuterike---Projekti-2
-Komunikimi midis pales se serverit dhe klienteve, permes protokollit TCP (Python)  
+Komunikimi midis pales se serverit dhe klienteve, permes protokollit TCP (Python)
+Ky projekt implementon protokollin TCP ku klientët komunikojnë me serverin duke shkëmbyer komanda dhe përgjigje. Serveri menaxhon lidhjet e klientëve dhe kontrollon aksesin bazuar në privilegjet e secilit klient.
+
+Funksionalitetet e Serverit:
+Menaxhimi i Lidhjeve të Klientëve:
+Serveri mbështet deri në 4 lidhje të njëkohshme me klientë.
+Klienti i parë që lidhet merr akses të plotë dhe ka mundësinë të përdorë të gjitha funksionalitetet e serverit.
+Klientët e tjerë që lidhen kanë privilegje të kufizuara, duke pasur akses vetëm për lexim të fajllave.
+Komandat e Lejuara për Klientët
+
+Komandat për Klientët me Akses të Plotë:
+GET FILES: Liston të gjitha fajllet e disponueshme në SERVER_FILES_DIR.
+READ FILE <filename>: Hap dhe lexon përmbajtjen e një fajlli të specifikuar nga SERVER_FILES_DIR.
+EXEC CREATE <filename>: Krijon një fajll të ri në SERVER_FILES_DIR.
+EXEC LIST: Shfaq listën e klientëve të lidhur aktualisht dhe privilegjet e tyre.
+WRITE <filename> <text>: Shkruan tekstin e dhënë në fajllin e përzgjedhur.
+
+Komandat për Klientët me Akses të Kufizuar:
+GET FILES: Shfaq një mesazh që tregon kufizimin e aksesit për listimin e fajlleve.
+READ FILE <filename>: Lexon përmbajtjen e një fajlli të dhënë, nëse ai ekziston në SERVER_FILES_DIR.
 
 Kerkesat
 
